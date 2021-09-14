@@ -105,13 +105,7 @@ contract TheRarityPlains is ERC721 {
 
     }
 
-    struct Research {
-        uint256 timeInDays;
-        uint256 initBlock; //Block when research started
-        bool discovered;
-        uint256 summonerId;
-        address owner;
-    }
+    //Returns random drop from random mob
     function returnDrop(Hunt memory hunt)internal returns(string memory drop){
         string memory _string = string(abi.encodePacked(hunt.summonerId, abi.encodePacked(hunt.owner), abi.encodePacked(hunt.initBlock), abi.encodePacked(globalSeed)));
         uint256 randint = _random(_string);
@@ -137,6 +131,7 @@ contract TheRarityPlains is ERC721 {
 
 
     }
+    //Begins Hunt
     function startHunt(uint256 summonerId) public returns(uint256){
         require(_isApprovedOrOwnerOfSummoner(summonerId, msg.sender), "not your summoner");
         (,,,uint256 summonerLevel) = rarityContract.summoner(summonerId);
@@ -147,6 +142,7 @@ contract TheRarityPlains is ERC721 {
         return summonerId;
     }
 
+    //Completes Hunt
     function killCreature(uint256 summonerId) public returns(uint256){
         Hunt memory hunt = hunts[msg.sender][summonerId];
         require(!hunt.found && hunt.timeInDays > 0, "already discovered or not initialized");
@@ -207,7 +203,7 @@ contract TheRarityPlains is ERC721 {
     }
 
 
-    //View your treasure
+    //View your loot
     function loot(uint tokenId) external view returns (string memory _itemName) {
         _itemName = items[tokenId];
     }
