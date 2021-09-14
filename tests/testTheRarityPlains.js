@@ -12,10 +12,13 @@ describe("TheRarityPlains", function () {
         //Mock rarity
         this.Rarity = await smock.mock('rarity');
         this.rarity = await this.Rarity.deploy();
+        //Mock attributes
+        this.Rarity_attributes = await smock.mock('rarity_attributes')
+        this.rarity_attributes = await this.Rarity_attributes.deploy(this.rarity.address)
 
         //Deploy
         this.TheRarityPlains = await ethers.getContractFactory("TheRarityPlains");
-        this.theRarityPlains = await this.TheRarityPlains.deploy(this.rarity.address);
+        this.theRarityPlains = await this.TheRarityPlains.deploy(this.rarity.address,this.rarity_attributes.address);
         await this.theRarityPlains.deployed();
 
         await this.rarity.summon(5);

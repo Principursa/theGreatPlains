@@ -1,10 +1,10 @@
 //SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.0;
+pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./interfaces/IRarity.sol";
-
+import "./interfaces/IAttributes.sol";
 /// [MIT License]
 /// @title Base64
 /// @notice Provides a function for encoding some bytes in base64
@@ -77,9 +77,11 @@ contract TheRarityPlains is ERC721 {
     }
     Monster[] public monsters;
     string location = "The Great Plains";
+    attributes attr; 
 
-    constructor(address _rarityAddr) ERC721("TheRarityPlains", "TRP") {
+    constructor(address _rarityAddr,address _attrAddr) ERC721("TheRarityPlains", "TRP") {
         rarityContract = IRarity(_rarityAddr);
+        attr = attributes(_attrAddr);
         monsters.push(Monster("Slime",["Slime Shell","Slime Excretion","Slime Nucleus"],50));
         monsters.push(Monster("Wolf",["Wolf Skull","Wolf Teeth","Wolf Hide"],25));
         monsters.push(Monster("Horse",["Horse Hair","Horse Meat","Horse Hide"],15));
@@ -102,6 +104,7 @@ contract TheRarityPlains is ERC721 {
         bool found;
         uint256 summonerId;
         address owner;
+        uint256 wisModifier;
 
     }
 
@@ -110,6 +113,7 @@ contract TheRarityPlains is ERC721 {
         string memory _string = string(abi.encodePacked(hunt.summonerId, abi.encodePacked(hunt.owner), abi.encodePacked(hunt.initBlock), abi.encodePacked(globalSeed)));
         uint256 randint = _random(_string);
         uint256 index =  randint % 100;
+        index = index + hunt.wisModifier;
         globalSeed = index;
         if (90 < index ){
 
@@ -134,12 +138,60 @@ contract TheRarityPlains is ERC721 {
     //Begins Hunt
     function startHunt(uint256 summonerId) public returns(uint256){
         require(_isApprovedOrOwnerOfSummoner(summonerId, msg.sender), "not your summoner");
+        uint _class = rarityContract.class(summonerId);
+        (,,,,uint256 _wis,) = attr.ability_scores(summonerId);
         (,,,uint256 summonerLevel) = rarityContract.summoner(summonerId);
+        uint256 WisCheck =uint(wisCheck(_class,_wis,summonerLevel));
+        uint256 _wisModifier = uint(modifier_for_attribute(_wis));
         require(summonerLevel >= 2, "not level >= 2");
         require(hunts[msg.sender][summonerId].timeInDays == 0 || hunts[msg.sender][summonerId].found == true, "not empty or not fount yet"); //If empty or already found
-        hunts[msg.sender][summonerId] = Hunt(4, block.timestamp, false, summonerId, msg.sender);
+        hunts[msg.sender][summonerId] = Hunt(4, block.timestamp, false, summonerId, msg.sender,_wisModifier);
         emit HuntStarted(summonerId, msg.sender);
         return summonerId;
+    }
+    function base_attack_bonus_by_class(uint _class) public pure returns (uint attack) {
+        if (_class == 1) {
+            attack = 3;
+        } else if (_class == 2) {
+            attack = 2;
+        } else if (_class == 3) {
+            attack = 2;
+        } else if (_class == 4) {
+            attack = 4;
+        } else if (_class == 5) {
+            attack = 3;
+        } else if (_class == 6) {
+            attack = 3;
+        } else if (_class == 7) {
+            attack = 2;
+        } else if (_class == 8) {
+            attack = 4;
+        } else if (_class == 9) {
+            attack = 4;
+        } else if (_class == 10) {
+            attack = 2;
+        } else if (_class == 11) {
+            attack = 2;
+        }
+    }
+
+    function base_attack_bonus_by_class_and_level(uint _class, uint _level) public pure returns (uint) {
+        return _level * base_attack_bonus_by_class(_class) / 4;
+    }
+
+
+    function modifier_for_attribute(uint _attribute) public pure returns (int _modifier) {
+        if (_attribute == 9) {
+            return -1;
+        }
+        return (int(_attribute) - 10) / 2;
+    }
+
+    function skillCheck() internal returns(uint256){
+
+    }
+    function wisCheck(uint class, uint wis, uint level) internal returns(int){
+       return  int(base_attack_bonus_by_class_and_level(class, level)) + modifier_for_attribute(wis);
     }
 
     //Completes Hunt

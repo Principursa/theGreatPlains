@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.0;
+pragma solidity ^0.8.7;
 
 interface IRarity {
     function ownerOf(uint256 tokenId) external view returns (address owner);
@@ -7,4 +7,7 @@ interface IRarity {
     function spend_xp(uint _summoner, uint _xp) external;
     function getApproved(uint256 tokenId) external view returns (address);
     function isApprovedForAll(address owner, address operator) external view returns (bool);
+    function class(uint) external view returns (uint);
+    function level(uint) external view returns (uint);
+
 }
