@@ -11,3 +11,5 @@ Forked from theRarityForest
 
 -Wait four days, then call `killCreature` which will return a randomly chosen drop from a list of Monsters;
 
+Personal address:
+0x4D9D5AB341e89384c245BDa8696Cdb813014a09D
