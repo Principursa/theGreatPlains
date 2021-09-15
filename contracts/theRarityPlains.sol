@@ -104,7 +104,7 @@ contract TheRarityPlains is ERC721 {
         bool found;
         uint256 summonerId;
         address owner;
-        uint256 wisModifier;
+        int wisModifier;
 
     }
 
@@ -112,9 +112,9 @@ contract TheRarityPlains is ERC721 {
     function returnDrop(Hunt memory hunt)internal returns(string memory drop){
         string memory _string = string(abi.encodePacked(hunt.summonerId, abi.encodePacked(hunt.owner), abi.encodePacked(hunt.initBlock), abi.encodePacked(globalSeed)));
         uint256 randint = _random(_string);
-        uint256 index =  randint % 100;
-        index = index + hunt.wisModifier;
-        globalSeed = index;
+        int index =  int(randint % 100);
+        globalSeed = uint256(index);
+        index += hunt.wisModifier;
         if (90 < index ){
 
             return (monsters[3].drops[randint % monsters[3].drops.length]);
@@ -128,7 +128,7 @@ contract TheRarityPlains is ERC721 {
             return (monsters[1].drops[randint % monsters[1].drops.length]);
 
         }
-        if (0 <= index){
+        else{
             return (monsters[0].drops[randint % monsters[0].drops.length]);
 
         }
@@ -142,10 +142,10 @@ contract TheRarityPlains is ERC721 {
         (,,,,uint256 _wis,) = attr.ability_scores(summonerId);
         (,,,uint256 summonerLevel) = rarityContract.summoner(summonerId);
         uint256 WisCheck =uint(wisCheck(_class,_wis,summonerLevel));
-        uint256 _wisModifier = uint(modifier_for_attribute(_wis));
+        int _wisModifier = modifier_for_attribute(_wis);
         require(summonerLevel >= 2, "not level >= 2");
         require(hunts[msg.sender][summonerId].timeInDays == 0 || hunts[msg.sender][summonerId].found == true, "not empty or not fount yet"); //If empty or already found
-        hunts[msg.sender][summonerId] = Hunt(4, block.timestamp, false, summonerId, msg.sender,_wisModifier);
+        hunts[msg.sender][summonerId] = Hunt(2, block.timestamp, false, summonerId, msg.sender,_wisModifier);
         emit HuntStarted(summonerId, msg.sender);
         return summonerId;
     }
