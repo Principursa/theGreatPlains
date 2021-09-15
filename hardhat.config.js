@@ -5,7 +5,7 @@ let { privateKey, alchemyUrl, ftmscanApiKey } = require("./secrets.json");
 
 module.exports = {
   solidity: {
-    version: "0.8.0",
+        version: "0.8.7",
     settings: {
       outputSelection: {
         "*": {

@@ -12,10 +12,13 @@ describe("TheRarityPlains", function () {
         //Mock rarity
         this.Rarity = await smock.mock('rarity');
         this.rarity = await this.Rarity.deploy();
+        //Mock attributes
+        this.Rarity_attributes = await smock.mock('rarity_attributes')
+        this.rarity_attributes = await this.Rarity_attributes.deploy(this.rarity.address)
 
         //Deploy
         this.TheRarityPlains = await ethers.getContractFactory("TheRarityPlains");
-        this.theRarityPlains = await this.TheRarityPlains.deploy(this.rarity.address);
+        this.theRarityPlains = await this.TheRarityPlains.deploy(this.rarity.address,this.rarity_attributes.address);
         await this.theRarityPlains.deployed();
 
         await this.rarity.summon(5);
@@ -28,6 +31,11 @@ describe("TheRarityPlains", function () {
         await this.rarity.setVariable('xp', {
             1: ethers.utils.parseUnits("1500000")
         });
+        await this.rarity.approve(this.rarity_attributes.address,1)
+        await this.rarity_attributes.point_buy(1,8,8,8,10,20,14)
+        await this.rarity_attributes.setVariable('ability_scores', {
+            1: (20,20,20,20,20,20)
+        })
     });
 
     it("Should start hunt successfully...", async function () {
@@ -46,9 +54,14 @@ describe("TheRarityPlains", function () {
 
         await this.theRarityPlains.killCreature(1);
         let output = await this.theRarityPlains.tokenURI(0)
+        let character = await this.rarity_attributes.tokenURI(1)
+        let stats = await this.rarity.tokenURI(1)
         let loot = await this.theRarityPlains.loot(0)
         console.log("-name:", loot);
         console.log(output)
+        console.log(character)
+        console.log(stats)
+
     });
 
 
