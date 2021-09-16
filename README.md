@@ -11,5 +11,8 @@ Forked from theRarityForest
 
 -Wait two days, then call `killCreature` which will return a randomly chosen drop from a list of Monsters;
 
+- Current mobs are: Slimes, Wolves, Horses and Buffalo
+
+- Current Drops are Slime Shell, Slime Excretion, Slime Nucleus, Wolf Skull, Wolf Teeth, Wolf Hide, Horse Hair, Horse Meat, Horse Hide,Buffalo Hide, Buffalo Meat and Buffalo Horns
 Personal address:
 0x4D9D5AB341e89384c245BDa8696Cdb813014a09D

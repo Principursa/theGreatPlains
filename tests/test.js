@@ -58,9 +58,10 @@ describe("TheRarityPlains", function () {
         let stats = await this.rarity.tokenURI(1)
         let loot = await this.theRarityPlains.loot(0)
         console.log("-name:", loot);
-        console.log(output)
-        console.log(character)
-        console.log(stats)
+
+        console.log("Loot URI: " + output)
+        console.log("Rarity URI:" + character)
+        console.log("Attributes URI:" + stats)
 
     });
 

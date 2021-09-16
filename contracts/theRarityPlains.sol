@@ -141,11 +141,10 @@ contract TheRarityPlains is ERC721 {
         uint _class = rarityContract.class(summonerId);
         (,,,,uint256 _wis,) = attr.ability_scores(summonerId);
         (,,,uint256 summonerLevel) = rarityContract.summoner(summonerId);
-        uint256 WisCheck =uint(wisCheck(_class,_wis,summonerLevel));
-        int _wisModifier = modifier_for_attribute(_wis);
+        int _wisCheck =statCheck(_class,_wis,summonerLevel);
         require(summonerLevel >= 2, "not level >= 2");
         require(hunts[msg.sender][summonerId].timeInDays == 0 || hunts[msg.sender][summonerId].found == true, "not empty or not fount yet"); //If empty or already found
-        hunts[msg.sender][summonerId] = Hunt(2, block.timestamp, false, summonerId, msg.sender,_wisModifier);
+        hunts[msg.sender][summonerId] = Hunt(2, block.timestamp, false, summonerId, msg.sender,_wisCheck);
         emit HuntStarted(summonerId, msg.sender);
         return summonerId;
     }
@@ -190,7 +189,7 @@ contract TheRarityPlains is ERC721 {
     function skillCheck() internal returns(uint256){
 
     }
-    function wisCheck(uint class, uint wis, uint level) internal returns(int){
+    function statCheck(uint class, uint wis, uint level) internal pure returns(int){
        return  int(base_attack_bonus_by_class_and_level(class, level)) + modifier_for_attribute(wis);
     }
 
