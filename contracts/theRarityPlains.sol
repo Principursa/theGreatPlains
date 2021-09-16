@@ -70,27 +70,33 @@ contract TheRarityPlains is ERC721 {
 
     using Counters for Counters.Counter;
     using Strings for uint256;
+    struct Loot {
+        string name;
+        string description;
+    }
     struct Monster {
         string name;
-        string[3] drops;
+        Loot[3] drops;
         uint256 rarity;
     }
     Monster[] public monsters;
     string location = "The Great Plains";
     attributes attr; 
 
+
     constructor(address _rarityAddr,address _attrAddr) ERC721("TheRarityPlains", "TRP") {
         rarityContract = IRarity(_rarityAddr);
         attr = attributes(_attrAddr);
-        monsters.push(Monster("Slime",["Slime Shell","Slime Excretion","Slime Nucleus"],50));
-        monsters.push(Monster("Wolf",["Wolf Skull","Wolf Teeth","Wolf Hide"],25));
-        monsters.push(Monster("Horse",["Horse Hair","Horse Meat","Horse Hide"],15));
-        monsters.push(Monster("Buffalo",["Buffalo Hide","Buffalo Meat","Buffalo Horns"],10));
+        monsters.push(Monster("Slime",[Loot("Slime Shell","Generic Description"),Loot("Slime Excretion","Generic Description"),Loot("Slime Nucleus","Generic Description")],50));
+        monsters.push(Monster("Wolf",[Loot("Wolf Skull","Generic Description"),Loot("Wolf Teeth","Generic Description"),Loot("Wolf Hide","Generic Description")],25));
+        monsters.push(Monster("Horse",[Loot("Horse Hair","Generic Description"),Loot("Horse Meat","Generic Description"),Loot("Horse Hide","Generic Description")],15));
+        monsters.push(Monster("Buffalo",[Loot("Buffalo Hide","Generic Description"),Loot("Buffalo Meat","Generic Description"),Loot("Buffalo Horns","Generic Description")],10));
+        monsters.push(Monster("Thunderbird",[Loot("Zap Feathers","Generic Description"),Loot("Lightning Bone Rods","Generic Description"),Loot("Eye of Thunder","Generic Description")],0));
     }
 
     uint256 private globalSeed;
     IRarity public rarityContract;
-    mapping(uint256 => string) items;
+    mapping(uint256 => Loot) items;
     mapping (address=>mapping (uint256=>Hunt)) hunts;
 
     Counters.Counter public _tokenIdCounter;
@@ -109,7 +115,7 @@ contract TheRarityPlains is ERC721 {
     }
 
     //Returns random drop from random mob
-    function returnDrop(Hunt memory hunt)internal returns(string memory drop){
+    function returnDrop(Hunt memory hunt)internal returns(Loot memory drop){
         string memory _string = string(abi.encodePacked(hunt.summonerId, abi.encodePacked(hunt.owner), abi.encodePacked(hunt.initBlock), abi.encodePacked(globalSeed)));
         uint256 randint = _random(_string);
         int index =  int(randint % 100);
@@ -199,12 +205,12 @@ contract TheRarityPlains is ERC721 {
         require(!hunt.found && hunt.timeInDays > 0, "already discovered or not initialized");
         require(hunt.initBlock + (hunt.timeInDays * 1 days) < block.timestamp, "not finish yet");
         //mint erc721 based on pseudo random things
-        (string memory _itemName) = returnDrop(hunt);
+        (Loot memory _loot) = returnDrop(hunt);
         uint256 newTokenId = safeMint(msg.sender);
-        items[newTokenId] = _itemName;
+        items[newTokenId] = _loot;
         hunt.found = true;
         hunts[msg.sender][summonerId] = hunt;
-        emit ItemAccquired(_itemName);
+        emit ItemAccquired(_loot.name);
         return newTokenId;
 
     }
@@ -234,18 +240,20 @@ contract TheRarityPlains is ERC721 {
     }
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
-        string[5] memory parts;
+        string[7] memory parts;
         parts[0] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
 
-        parts[1] = string(abi.encodePacked("Name:", " ", items[tokenId]));
+        parts[1] = string(abi.encodePacked("Name:", " ", items[tokenId].name));
         parts[2] = '</text><text x="10" y="40" class="base">';
+        parts[3] = string(abi.encodePacked("Description:", " ", items[tokenId].description));
+        parts[4] = '</text><text x="10" y="40" class="base">';
 
-        parts[3] = string(abi.encodePacked("Location:", " ", location));
+        parts[5] = string(abi.encodePacked("Location:", " ", location));
 
 
-        parts[4] = '</text></svg>';
+        parts[6] = '</text></svg>';
 
-        string memory output = string(abi.encodePacked(parts[0], parts[1], parts[2],parts[3],parts[4]));
+        string memory output = string(abi.encodePacked(parts[0], parts[1], parts[2],parts[3],parts[4],parts[5],parts[6]));
 
         string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "loot #', tokenId.toString(), '", "description": "You have bested the plains, to the victor go the spoils", "image": "data:image/svg+xml;base64,', Base64.encode(bytes(output)), '"}'))));
         output = string(abi.encodePacked('data:application/json;base64,', json));
@@ -256,7 +264,7 @@ contract TheRarityPlains is ERC721 {
 
     //View your loot
     function loot(uint tokenId) external view returns (string memory _itemName) {
-        _itemName = items[tokenId];
+        _itemName = items[tokenId].name;
     }
 
 }
