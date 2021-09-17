@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./interfaces/IRarity.sol";
 import "./interfaces/IAttributes.sol";
+import "./interfaces/rarity_skills.sol";
 /// [MIT License]
 /// @title Base64
 /// @notice Provides a function for encoding some bytes in base64
@@ -79,8 +80,9 @@ contract TheRarityPlains is ERC721 {
     string location = "The Great Plains";
     attributes attr; 
 
-    constructor(address _rarityAddr,address _attrAddr) ERC721("TheRarityPlains", "TRP") {
+    constructor(address _rarityAddr,address _attrAddr,address _skillsContract) ERC721("TheRarityPlains", "TRP") {
         rarityContract = IRarity(_rarityAddr);
+        skillsContract = IRarity_skills(_skillsContract);
         attr = attributes(_attrAddr);
         monsters.push(Monster("Slime",["Slime Shell","Slime Excretion","Slime Nucleus"],50));
         monsters.push(Monster("Wolf",["Wolf Skull","Wolf Teeth","Wolf Hide"],25));
@@ -90,6 +92,7 @@ contract TheRarityPlains is ERC721 {
 
     uint256 private globalSeed;
     IRarity public rarityContract;
+    IRarity_skills public skillsContract;
     mapping(uint256 => string) items;
     mapping (address=>mapping (uint256=>Hunt)) hunts;
 

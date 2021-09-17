@@ -1,5 +1,6 @@
 const { expect } = require("chai");
 const { smock } = require("@defi-wonderland/smock");
+const { ethers } = require("hardhat");
 
 describe("TheRarityPlains", function () {
 
@@ -15,10 +16,17 @@ describe("TheRarityPlains", function () {
         //Mock attributes
         this.Rarity_attributes = await smock.mock('rarity_attributes')
         this.rarity_attributes = await this.Rarity_attributes.deploy(this.rarity.address)
+        //Mock Codex Skills
+        this.Codex_skills = await ethers.getContractFactory("codex")
+        this.codex_skills = await this.Codex_skills.deploy()
+        await this.codex_skills.deployed()
+        //Mock Skills
+        this.Rarity_skills = await smock.mock('rarity_skills')
+        this.rarity_skills = await this.Rarity_skills.deploy(this.rarity.address,this.rarity_attributes.address,this.codex_skills.address)
 
         //Deploy
         this.TheRarityPlains = await ethers.getContractFactory("TheRarityPlains");
-        this.theRarityPlains = await this.TheRarityPlains.deploy(this.rarity.address,this.rarity_attributes.address);
+        this.theRarityPlains = await this.TheRarityPlains.deploy(this.rarity.address,this.rarity_attributes.address,this.rarity_skills.address);
         await this.theRarityPlains.deployed();
 
         await this.rarity.summon(5);
