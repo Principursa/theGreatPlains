@@ -166,9 +166,9 @@ contract rarity_skills {
     }
 
     function set_skills(uint _summoner, uint8[36] memory _skills) external {
-        require(_isApprovedOrOwner(_summoner));
-        require(_attr.character_created(_summoner));
-        require(is_valid_set(_summoner, _skills));
+        require(_isApprovedOrOwner(_summoner),"Is not Approved");
+        require(_attr.character_created(_summoner),"Is not created");
+        require(is_valid_set(_summoner, _skills),"Is not Valid set");
         uint8[36] memory _current_skills = skills[_summoner];
         for (uint i = 0; i < 36; i++) {
             require(_current_skills[i] <= _skills[i]);

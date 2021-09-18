@@ -145,9 +145,10 @@ contract TheRarityPlains is ERC721 {
         (,,,,uint256 _wis,) = attr.ability_scores(summonerId);
         (,,,uint256 summonerLevel) = rarityContract.summoner(summonerId);
         int _wisCheck =statCheck(_class,_wis,summonerLevel);
+        int _skillCheck = int(skillCheck(summonerId));
         require(summonerLevel >= 2, "not level >= 2");
         require(hunts[msg.sender][summonerId].timeInDays == 0 || hunts[msg.sender][summonerId].found == true, "not empty or not fount yet"); //If empty or already found
-        hunts[msg.sender][summonerId] = Hunt(2, block.timestamp, false, summonerId, msg.sender,_wisCheck);
+        hunts[msg.sender][summonerId] = Hunt(2, block.timestamp, false, summonerId, msg.sender,_wisCheck + _skillCheck);
         emit HuntStarted(summonerId, msg.sender);
         return summonerId;
     }
@@ -189,7 +190,21 @@ contract TheRarityPlains is ERC721 {
         return (int(_attribute) - 10) / 2;
     }
 
-    function skillCheck() internal returns(uint256){
+    function skillCheck(uint256 summonerId) internal view returns(uint256){
+        uint8[36] memory skills = skillsContract.get_skills(summonerId);
+        uint8[7] memory idArray = [10,16,20,21,26,31,33];
+        uint256 modif;
+        for(uint8 j = 0; j < skills.length; j++){
+            for(uint8 i = 0; i < idArray.length; i++){
+                if(skills[j] == idArray[i]){
+                    modif++;
+                }
+
+            }
+
+
+        }
+        return modif;
 
     }
     function statCheck(uint class, uint wis, uint level) internal pure returns(int){
